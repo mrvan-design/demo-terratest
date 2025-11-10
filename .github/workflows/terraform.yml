@@ -13,8 +13,13 @@ jobs:
         image: localstack/localstack:latest
         ports:
           - 4566:4566
+        options: >-
+          --health-cmd="curl -f http://localhost:4566/health || exit 1"
+          --health-interval=5s
+          --health-timeout=10s
+          --health-retries=5
         env:
-          SERVICES: ec2,iam,vpc
+          SERVICES: ec2,sts,s3
           DEBUG: 1
           AWS_DEFAULT_REGION: us-east-1
 
@@ -40,4 +45,4 @@ jobs:
         run: terraform apply -auto-approve
 
       - name: Run Terratest
-        run: go test -v ./tests
+        run: go test -v ./test
