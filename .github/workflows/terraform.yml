@@ -17,7 +17,7 @@ jobs:
           --health-cmd="curl -f http://localhost:4566/health || exit 1"
           --health-interval=5s
           --health-timeout=10s
-          --health-retries=5
+          --health-retries=30
         env:
           SERVICES: ec2,sts,s3
           DEBUG: 1
@@ -31,6 +31,15 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.5
+
+      - name: Wait for LocalStack
+        run: |
+          echo "Waiting for LocalStack to be ready..."
+          for i in {1..30}; do
+            curl -f http://localhost:4566/health && break
+            echo "LocalStack not ready yet..."
+            sleep 5
+          done
 
       - name: Terraform Init
         run: terraform init
